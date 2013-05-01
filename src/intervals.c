@@ -66,7 +66,7 @@ void vibrate();
 #define MY_UUID { 0x05, 0x6E, 0x0F, 0x30, 0x6D, 0xE2, 0x45, 0xE4, 0xA3, 0xE7, 0x56, 0xAE, 0xAB, 0xEB, 0xBE, 0x37 }
 PBL_APP_INFO(MY_UUID,
              "Intervals", "Jace Ferguson",
-             1, 0, /* App version */
+             1, 1, /* App version */
              DEFAULT_MENU_ICON,
              APP_INFO_STANDARD_APP);
 
@@ -94,7 +94,7 @@ uint16_t intervals[5], currSecCount = 0, totalRunCount = 0;
 
 uint8_t intervalCount = 1, currIntervalSetIdx, vibeCount = 0, currRunInt = 0;
 
-char setTimeTitleStr[] = "Interval 0";
+char setTimeTitleStr[] = "Interval 00";
 
 //Initial state of the app
 enum SettingsState current_state = INTERVAL_COUNT;
@@ -111,7 +111,7 @@ you can have.
 void adjustIntervals(int8_t change)
 {
   uint8_t newInterval = intervalCount + change;
-  if(newInterval <= 5 && newInterval >= 1)
+  if(newInterval <= 10 && newInterval >= 1)
   {
     intervalCount = newInterval;
     //Update the screen.
@@ -688,8 +688,6 @@ void skipToPrevInterval()
 **/
 void tick()
 {
-  //Increment the elapsed time counter
-  totalRunCount++;
   //Increment the seconds elapsed in current interval counter
   currSecCount++;
   
@@ -717,6 +715,8 @@ void tick()
     //We don't want to do the rest of the stuff in the function. 
     return;
   }
+  //Increment the elapsed time counter
+  totalRunCount++;
   
   //Update the screen to show that a second elapsed.
   updateRunTimeScreen();
@@ -735,10 +735,18 @@ void toggleRunning()
 **/
 void updateIntervalCount()
 {
-  static char countStr[2];
+  static char countStr[3];
   //Convert the int value to corresonding ascii.
+  if(intervalCount < 10)
+  {
   countStr[0] = intervalCount + 48;
   countStr[1] = 0;
+  }
+  else{
+    countStr[0] = intervalCount / 10 + 48;
+    countStr[1] = intervalCount % 10 + 48;
+    countStr[2] = 0;
+  }
   text_layer_set_text(&intervalCountString, countStr);
 }//End updateIntervalCount
 
@@ -755,7 +763,16 @@ void updateRunTimeScreen()
   //Get the total time elapsed time string
   formatTime(totalRunCount, runTimeStringText, true);
   //Update the number of interval we're on.
+  if(currRunInt + 1 < 10)
+  {
   setTimeTitleStr[9] = currRunInt + 1 + 48;
+  setTimeTitleStr[10] = 0;
+  }
+  else{
+    setTimeTitleStr[9] = (currRunInt + 1) / 10 + 48;
+    setTimeTitleStr[10] = (currRunInt + 1) % 10 + 48;
+    setTimeTitleStr[11] = 0;
+  }
 
   //Update the corresponding text layers
   text_layer_set_text(&runModeIntervalTextLayer, setTimeTitleStr);
@@ -789,7 +806,16 @@ void updateSetTimeScreen()
   secStrTxt[2] = 0;
 
   //Update the interval count label.
+  if(currIntervalSetIdx + 1 < 10)
+  {
   setTimeTitleStr[9] = currIntervalSetIdx + 1 + 48;
+  setTimeTitleStr[10] = 0;
+  }
+  else{
+    setTimeTitleStr[9] = (currIntervalSetIdx + 1) / 10 + 48;
+    setTimeTitleStr[10] = (currIntervalSetIdx + 1) % 10 + 48;
+    setTimeTitleStr[11] = 0;
+  }
 
   text_layer_set_text(&setTimeTitle, setTimeTitleStr);
   text_layer_set_text(&minStr, minStrTxt);
