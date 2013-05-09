@@ -40,7 +40,7 @@ void adjustIntervals(int8_t change);
 void adjustIntervalSetTime(enum SettingsUnit unit, int8_t change);
 void button_pressed_down(ClickRecognizerRef recognizer, Window *window);
 void button_pressed_up(ClickRecognizerRef recognizer, Window *window);
-void changeUnit(ClickRecognizerRef rec, Window *window);
+void changeUnit();
 void formatTime(uint16_t time, char *timeStr, bool setHours);
 void handle_init(AppContextRef ctx);
 void handle_second_tick(AppContextRef ctx, PebbleTickEvent *t);
@@ -51,6 +51,7 @@ void initSetTimeScreen();
 void nextState();
 void pbl_main(void *params);
 void prevState();
+void select_double_press(ClickRecognizerRef rec, Window *window);
 void select_long_press(ClickRecognizerRef rec, Window *window);
 void select_pressed(ClickRecognizerRef rec, Window *window);
 void settings_click_provider(ClickConfig **config, Window *window);
@@ -201,13 +202,16 @@ Change the unit we're currently setting.
 Also make sure whatever we had been previously setting
 gets set to black so it doesn't disappear.
 **/
-void changeUnit(ClickRecognizerRef rec, Window *window)
+void changeUnit()
+{
+if(current_state == TIME_SET)
 {
   //Make sure we don't accidentally leave one white and unreadable.
   text_layer_set_text_color(&minStr, GColorBlack);
   text_layer_set_text_color(&secStr, GColorBlack);
   //Change the unit
   setting_unit = !setting_unit;
+  }
 }//End changeUnit
 
 /**
@@ -324,7 +328,7 @@ void handle_timer_event(AppContextRef app_ctx, AppTimerHandle handle, uint32_t c
         text_layer_set_text_color(&secStr, newColor); 
       }
       //Reload the timer
-      app_timer_send_event(app_ctx, 250, 1);
+      app_timer_send_event(app_ctx, 150, 1);
       
     }
     else if(vibeCount > 0)
@@ -477,7 +481,7 @@ void nextState()
   {
     //The set time mode comes after the interval count mode
     //Start the time that flashes the units
-    app_timer_send_event(appCtx, 250, 1);
+    app_timer_send_event(appCtx, 150, 1);
     //Change state
     current_state = TIME_SET;
     //Clear out the index for the interval time we're setting
@@ -550,7 +554,7 @@ void prevState()
       //Switch to time_set mode
       current_state = TIME_SET;
       //Start the timer for unit flashing
-      app_timer_send_event(appCtx, 250, 1);
+      app_timer_send_event(appCtx, 150, 1);
       currIntervalSetIdx--;
       layer_set_hidden(&runLayer, true);
       layer_set_hidden(&setTimeLayer, false);
@@ -599,11 +603,19 @@ void select_pressed(ClickRecognizerRef rec, Window *window)
   {
     toggleRunning();
   }
-  else
+  else if(current_state == TIME_SET)
+  {
+    changeUnit();
+  }
+}//End selected_pressed
+
+void select_double_press(ClickRecognizerRef rec, Window *window)
+{
+  if(current_state == TIME_SET || current_state == INTERVAL_COUNT)
   {
     nextState();
   }
-}//End selected_pressed
+}
 
 /**
   Establish all the button handlers
@@ -612,13 +624,20 @@ void settings_click_provider(ClickConfig **config, Window *window){
 	config[BUTTON_ID_SELECT]->click.handler = (ClickHandler) select_pressed;
 	
 	config[BUTTON_ID_SELECT]->long_click.handler = (ClickHandler) select_long_press;
+	
+	config[BUTTON_ID_SELECT]->multi_click.handler = (ClickHandler) select_double_press;
+	config[BUTTON_ID_SELECT]->multi_click.last_click_only = true;
+	config[BUTTON_ID_SELECT]->multi_click.min = 2;
+	config[BUTTON_ID_SELECT]->multi_click.max = 2;
+	config[BUTTON_ID_SELECT]->multi_click.timeout = 100;
 
 	config[BUTTON_ID_UP]->click.handler = (ClickHandler) button_pressed_up;
-	config[BUTTON_ID_UP]->click.repeat_interval_ms = 300;
+	config[BUTTON_ID_UP]->click.repeat_interval_ms = 200;
 
 	config[BUTTON_ID_DOWN]->click.handler = (ClickHandler) button_pressed_down;
-	config[BUTTON_ID_DOWN]->click.repeat_interval_ms = 300;
+	config[BUTTON_ID_DOWN]->click.repeat_interval_ms = 200;
 
+/*
   config[BUTTON_ID_DOWN]->multi_click.handler = (ClickHandler) changeUnit;
   config[BUTTON_ID_DOWN]->multi_click.last_click_only = true;
   config[BUTTON_ID_DOWN]->multi_click.min = 2;
@@ -630,6 +649,7 @@ void settings_click_provider(ClickConfig **config, Window *window){
   config[BUTTON_ID_UP]->multi_click.min = 2;
   config[BUTTON_ID_UP]->multi_click.max = 2;
   config[BUTTON_ID_UP]->multi_click.timeout = 100;
+  */
 
 	(void)window;
 }//End settings_click_provider
