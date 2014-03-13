@@ -1,7 +1,10 @@
-Pebble Intervals v1.2
+Pebble Intervals v2.0
 =================
 
 This app allows the user to set up to five interval timers. For each interval the user will set a time. In run mode, the timer counts down the time set for the interval. Once the time for the interval elapses, the watch will vibrate a number of times to signify which interval just elapsed. The next interval will be started automatically. Once all of the intervals have elapsed, the app will start back over with the first and continue until the timer is paused or the app is exited.
+
+Version 2.0
+The app is no longer full screen and will display the current time in the status bar.
 
 ## Operation
 **Set Mode: Interval Count**
@@ -34,5 +37,4 @@ You can skip to the next or previous intervals by pressing the up and down butto
 
 While paused, you can go to previous screens simply long press the select button. This will clear all timers when you go back to run mode.
 
-Learn to compile the source here:
-[https://developer.getpebble.com/1/01_GetStarted/01_Step_3](here).
+
