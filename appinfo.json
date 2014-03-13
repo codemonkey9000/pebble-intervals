@@ -1,0 +1,24 @@
+{
+  "uuid": "056e0f30-6de2-45e4-a3e7-56aeabebbe37",
+  "shortName": "Intervals",
+  "longName": "Intervals",
+  "companyName": "Jace Ferguson",
+  "versionCode": 2,
+  "versionLabel": "2.0.0",
+  "watchapp": {
+    "watchface": false
+  },
+  
+  "appKeys": {},
+  "resources": {
+    "media": [
+    	{
+    		"menuIcon": true,
+    		"name": "MY_ICON",
+    		"file": "../res/icon.png",
+    		"type": "png"
+    	}
+    ]
+  }
+}
+ 
